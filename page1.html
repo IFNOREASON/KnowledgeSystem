@@ -1,0 +1,1973 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillForge | AI学习引擎</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #fafaf9;
+            --bg-card: rgba(255, 255, 255, 0.7);
+            --bg-secondary: rgba(245, 245, 244, 0.8);
+            --accent-teal: #14b8a6;
+            --accent-violet: #8b5cf6;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --accent-indigo: #6366f1;
+            --accent-emerald: #10b981;
+            --text-primary: #1c1917;
+            --text-secondary: #78716c;
+            --text-muted: #a8a29e;
+            --border: rgba(231, 229, 228, 0.6);
+            --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03), 0 1px 1px -1px rgb(0 0 0 / 0.02);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.02);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 50%, #e7e5e4 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 艺术感背景 */
+        .artistic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%);
+            top: -200px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
+            bottom: -150px;
+            left: -100px;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(244, 63, 94, 0.2) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* 玻璃拟态卡片 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.02),
+                0 2px 4px -2px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.05),
+                0 8px 10px -6px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 输入框艺术化 */
+        .neural-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(231, 229, 228, 0.8);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+        }
+
+        .neural-input:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 
+                0 0 0 4px rgba(20, 184, 166, 0.1),
+                0 4px 12px rgba(20, 184, 166, 0.08);
+        }
+
+        .neural-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* 按钮艺术化 */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-teal) 0%, #0d9488 100%);
+            border: none;
+            border-radius: 16px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 14px rgba(20, 184, 166, 0.35),
+                0 1px 2px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(20, 184, 166, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(231, 229, 228, 0.8);
+            border-radius: 16px;
+            padding: 10px 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+            transform: translateY(-1px);
+        }
+
+        /* 任务卡片艺术化 */
+        .task-card {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(231, 229, 228, 0.5);
+            border-radius: 16px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(180deg, var(--accent-teal), var(--accent-violet));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .task-card:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-card:hover::before {
+            opacity: 1;
+        }
+
+        .task-card.completed {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .task-card.completed::before {
+            background: var(--accent-emerald);
+            opacity: 1;
+        }
+
+        /* 标签艺术化 */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(231, 229, 228, 0.6);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .tag-purple {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.2);
+            color: #7c3aed;
+        }
+
+        .tag-green {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #059669;
+        }
+
+        .tag-orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: #d97706;
+        }
+
+        .mono-num {
+            font-family: 'Space Grotesk', monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .header-agent {
+                display: none !important;
+            }
+        }
+
+        /* 滚动条艺术化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(245, 245, 244, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #d6d3d1, #a8a29e);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #a8a29e, #78716c);
+        }
+
+        /* 弹窗艺术化 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(28, 25, 23, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 520px;
+            width: 90%;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* Agent卡片艺术化 */
+        .agent-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.8) 0%, rgba(243, 232, 255, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+        }
+
+        .agent-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .agent-card:hover {
+            border-color: rgba(20, 184, 166, 0.3);
+            box-shadow: 
+                0 0 0 4px rgba(20, 184, 166, 0.08),
+                0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .agent-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Header艺术化 */
+        .header-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 拖拽区域艺术化 */
+        .drop-zone {
+            border: 2px dashed rgba(20, 184, 166, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.05), rgba(139, 92, 246, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--accent-teal);
+            background: rgba(20, 184, 166, 0.05);
+            transform: scale(1.02);
+        }
+
+        .drop-zone.drag-over::before {
+            opacity: 1;
+        }
+
+        /* 导航栏Agent艺术化 */
+        .header-agent {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.9) 0%, rgba(243, 232, 255, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .header-agent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: rgba(20, 184, 166, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* 旭日图容器艺术化 */
+        .chart-container {
+            background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 70%);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        /* 统计卡片艺术化 */
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-violet));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        /* 标题艺术字体 */
+        .artistic-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #1c1917 0%, #44403c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* AI洞察艺术化 */
+        .insight-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-card::before {
+            content: '✦';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            color: rgba(251, 191, 36, 0.3);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 选择器艺术化 */
+        select.neural-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378716c'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+        /* 视图切换 3D 效果 */
+        .view-container {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .view-item {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
+
+        .view-item.active {
+            opacity: 1;
+            transform: rotateY(0deg) scale(1);
+            pointer-events: auto;
+        }
+
+        .view-item.hidden-view {
+            opacity: 0;
+            transform: rotateY(90deg) scale(0.8);
+            pointer-events: none;
+            position: absolute;
+        }
+
+        .view-item.entering {
+            animation: viewEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .view-item.exiting {
+            animation: viewExit 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes viewEnter {
+            0% {
+                opacity: 0;
+                transform: rotateY(-90deg) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: rotateY(0deg) scale(1);
+            }
+        }
+
+        @keyframes viewExit {
+            0% {
+                opacity: 1;
+                transform: rotateY(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: rotateY(90deg) scale(0.8);
+            }
+        }
+
+        /* 3D 视图特殊样式 */
+        #networkView canvas {
+            border-radius: 16px;
+        }
+
+        /* 按钮激活状态 */
+        .view-btn-active {
+            background: white !important;
+            color: #1c1917 !important;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+            border: 1px solid #e7e5e4 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 艺术感背景 -->
+    <div class="artistic-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 header-nav mx-6 mt-6 px-8 py-4 flex justify-between items-center rounded-3xl">
+        <div class="flex items-center space-x-6">
+            <!-- Logo -->
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <span class="font-bold text-xl artistic-title">SkillForge</span>
+            </div>
+
+            <!-- 分隔线 -->
+            <div class="w-px h-10 bg-stone-200"></div>
+
+            <!-- 战略导师模块 -->
+            <div class="header-agent" onclick="openFeedModal()">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-violet-500 flex items-center justify-center shadow-md">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-sm text-stone-700">战略导师 Alpha</span>
+                        <span class="status-dot"></span>
+                    </div>
+                    <div class="text-xs text-stone-500 font-medium">点击投喂知识</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <button class="btn-secondary text-sm" onclick="toggleCLI()">CLI模式</button>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-stone-400 to-stone-600 flex items-center justify-center text-sm text-white font-semibold shadow-md">
+                U
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主布局 -->
+    <main class="main-grid pt-36 pb-12 px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-[1440px] mx-auto relative">
+        
+        <!-- 侧边栏切换按钮 -->
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="fixed left-6 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-2xl bg-white shadow-xl border-2 border-stone-200 flex items-center justify-center hover:shadow-2xl hover:border-teal-300 transition-all group">
+            <svg id="toggleIcon" class="w-6 h-6 text-stone-600 transition-transform duration-300 group-hover:text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+            </svg>
+        </button>
+
+        <!-- 左侧：目标与任务 (4列) -->
+        <aside id="sidebar" class="lg:col-span-4 space-y-6 transition-all duration-300">
+            <!-- 总体目标 -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-semibold text-sm text-teal-600 uppercase tracking-wider">总体目标 Goal</h3>
+                    <div class="flex gap-2">
+                        <button onclick="openNewGoalModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 transition-all">
+                            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            新增
+                        </button>
+                        <button onclick="openHistoryModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-stone-100 text-stone-600 border border-stone-200 hover:bg-stone-200 transition-all">
+                            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            历史
+                        </button>
+                    </div>
+                </div>
+                            
+                <!-- 目标名称 -->
+                <div class="mb-4">
+                    <div class="text-lg font-bold text-stone-800 mb-1">python进阶</div>
+                    <div class="text-xs text-stone-500">进阶阶段 · 3个月周期</div>
+                </div>
+                            
+                <!-- 倒计时 -->
+                <div class="mb-4 p-4 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-teal-700">剩余时间</span>
+                        <span class="text-xs text-teal-600">开始于 2026-01-08</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3 text-center">
+                        <div>
+                            <div class="text-2xl font-bold mono-num text-teal-700" id="countdown-days">67</div>
+                            <div class="text-[10px] text-teal-600">天</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold mono-num text-teal-700" id="countdown-hours">14</div>
+                            <div class="text-[10px] text-teal-600">时</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold mono-num text-teal-700" id="countdown-minutes">32</div>
+                            <div class="text-[10px] text-teal-600">分</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold mono-num text-teal-700" id="countdown-seconds">45</div>
+                            <div class="text-[10px] text-teal-600">秒</div>
+                        </div>
+                    </div>
+                </div>
+                            
+                <!-- 进度条 -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-stone-700">完成进度</span>
+                        <span class="text-sm font-bold mono-num text-teal-600">35%</span>
+                    </div>
+                    <div class="h-3 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
+                        <div class="h-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500" style="width: 35%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-stone-500">
+                        <span>已用 32 天</span>
+                        <span>目标 90 天</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 今日任务 -->
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="font-semibold text-sm text-emerald-600 uppercase tracking-wider">今日学习任务</h3>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-medium text-stone-500 bg-stone-100 px-3 py-1 rounded-full">3/5 完成</span>
+                        <button onclick="openTomorrowPlanModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 transition-all">
+                            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            明日计划
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-3" id="taskList">
+                    <div class="task-card completed flex items-start gap-4" onclick="toggleTask(this)">
+                        <div class="w-5 h-5 rounded-lg border-2 border-emerald-500 bg-emerald-50 flex items-center justify-center mt-0.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm line-through text-stone-400 font-medium">完成逻辑推理测试 - Level 3</div>
+                            <div class="text-xs text-stone-500 mt-1.5 font-medium">逻辑导师 · 15分钟</div>
+                        </div>
+                    </div>
+
+                    <div class="task-card flex items-start gap-4" onclick="toggleTask(this)">
+                        <div class="w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5 transition-colors"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-stone-700">阅读：系统架构设计模式</div>
+                            <div class="text-xs text-stone-500 mt-1.5 font-medium">技术导师 · 30分钟 · <span class="text-rose-500">高优先级</span></div>
+                            <div class="mt-3 flex gap-2">
+                                <span class="tag">架构</span>
+                                <span class="tag">微服务</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-card flex items-start gap-4" onclick="toggleTask(this)">
+                        <div class="w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-stone-700">创意练习：重新设计购物车流程</div>
+                            <div class="text-xs text-stone-500 mt-1.5 font-medium">创意导师 · 45分钟</div>
+                        </div>
+                    </div>
+
+                    <div class="task-card flex items-start gap-4" onclick="toggleTask(this)">
+                        <div class="w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-stone-700">写作训练：技术方案文档撰写</div>
+                            <div class="text-xs text-stone-500 mt-1.5 font-medium">语言导师 · 20分钟</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="w-full mt-4 py-3 border-2 border-dashed border-stone-300 rounded-2xl text-sm text-stone-500 hover:border-teal-400 hover:text-teal-600 transition-all bg-stone-50/50 font-medium">
+                    + 添加自定义任务
+                </button>
+            </div>
+
+            <!-- 快速统计 -->
+            <div class="glass-card p-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold mono-num text-teal-600 mb-1">24h</div>
+                        <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">本周学习</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold mono-num text-violet-600 mb-1">156</div>
+                        <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">知识点</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold mono-num text-emerald-600 mb-1">12</div>
+                        <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">完成项目</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold mono-num text-amber-600 mb-1">Top 5%</div>
+                        <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">全球排名</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧：能力全景与总结 (8列) -->
+        <section id="mainContent" class="lg:col-span-8 space-y-6 transition-all duration-300">
+            <!-- 能力全景图 -->
+            <div class="glass-card p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold artistic-title mb-2">能力全景图</h2>
+                        <p class="text-sm text-stone-500 font-medium">六边形战士进化系统 · 实时拓扑</p>
+                    </div>
+                    <div class="flex space-x-2 bg-stone-100 p-1.5 rounded-2xl">
+                        <button id="btnRadar" onclick="switchView('radar')" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white text-stone-700 shadow-sm border border-stone-200 transition-all">雷达</button>
+                        <button id="btnNetwork" onclick="switchView('network')" class="px-4 py-2 rounded-xl text-xs font-semibold text-stone-500 hover:text-stone-700 transition-all">网络</button>
+                        <button id="btn3D" onclick="switchView('3d')" class="px-4 py-2 rounded-xl text-xs font-semibold text-stone-500 hover:text-stone-700 transition-all">知识图谱</button>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="relative h-[400px] flex items-center justify-center view-container" id="viewContainer">
+                        <!-- 雷达视图 (ECharts 雷达图) -->
+                        <div class="w-full h-full view-item active" id="radarChartContainer" data-view="radar"></div>
+                        
+                        <!-- 悬浮提示 -->
+                        <div id="tooltip" class="absolute hidden bg-white/95 backdrop-blur-xl border border-white/60 rounded-2xl p-4 shadow-2xl text-sm" style="z-index: 100; min-width: 180px;">
+                            <div class="font-bold text-teal-600 mb-2 text-base"></div>
+                            <div class="text-stone-600 leading-relaxed"></div>
+                        </div>
+                        
+                        <!-- 网络视图 (知识图谱) -->
+                        <div class="absolute inset-0 view-item hidden" id="networkView" data-view="network">
+                            <canvas id="knowledgeGraph" class="w-full h-full"></canvas>
+                            <!-- 知识图谱悬浮提示 -->
+                            <div id="graphTooltip" class="absolute hidden bg-white/95 backdrop-blur-xl border border-white/60 rounded-2xl p-4 shadow-2xl text-sm" style="z-index: 100; min-width: 180px; pointer-events: none;">
+                                <div class="font-bold text-teal-600 mb-1 text-base"></div>
+                                <div class="text-stone-500 text-xs mb-2"></div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-stone-600 text-xs">掌握度:</span>
+                                    <div class="flex-1 h-1.5 bg-stone-200 rounded-full overflow-hidden" style="width: 60px;">
+                                        <div class="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="text-teal-600 text-xs font-semibold"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI洞察 -->
+                <div class="mt-6 insight-card p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <span class="text-base font-bold text-amber-700">AI洞察</span>
+                    </div>
+                    <p class="text-sm text-stone-600 leading-relaxed pl-13">
+                        今日技术深度提升显著，但商业洞察训练不足。建议明日增加市场分析任务，平衡六边形发展。
+                    </p>
+                </div>
+            </div>
+
+            
+        </section>
+    </main>
+
+    <!-- 知识投喂弹窗 -->
+    <div id="feedModal" class="modal-overlay" onclick="closeFeedModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 to-violet-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg text-stone-800">投喂知识给 Alpha</div>
+                        <div class="text-sm text-stone-500 font-medium">主Agent将自动解析并整合</div>
+                    </div>
+                </div>
+                <button onclick="closeFeedModal()" class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 拖拽区域 -->
+            <div class="drop-zone mb-5" id="dropZone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-teal-100 to-violet-100 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                </div>
+                <p class="text-base text-stone-700 font-semibold mb-2">拖拽文件到此处</p>
+                <p class="text-sm text-stone-400">或粘贴链接、输入文本</p>
+            </div>
+
+            <textarea 
+                id="feedInput" 
+                class="neural-input w-full h-28 resize-none text-base mb-5"
+                placeholder="粘贴任意链接、输入文本描述... 支持图片、文档、视频链接"
+            ></textarea>
+
+            <div class="flex gap-3">
+                <button class="flex-1 btn-secondary text-sm py-3 font-semibold" onclick="closeFeedModal()">取消</button>
+                <button class="flex-1 btn-primary text-sm py-3 font-semibold" onclick="submitFeed()">开始解析</button>
+            </div>
+
+            <!-- 解析状态 -->
+            <div id="feedStatus" class="hidden mt-5 p-4 rounded-2xl bg-teal-50 border border-teal-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-5 h-5 border-3 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span class="text-sm text-teal-700 font-semibold">正在分析内容结构...</span>
+                </div>
+            </div>
+
+            <!-- 最近投喂 -->
+            <div class="mt-6 pt-6 border-t border-stone-200">
+                <div class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-3">最近投喂</div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 text-sm p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition cursor-pointer">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                        <span class="text-stone-700 font-medium flex-1">深度学习中的注意力机制详解</span>
+                        <span class="text-stone-400 text-xs">2h前</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition cursor-pointer">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                        <span class="text-stone-700 font-medium flex-1">Figma高级组件设计模式</span>
+                        <span class="text-stone-400 text-xs">5h前</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLI模式 -->
+    <div id="cliOverlay" class="fixed inset-0 z-[100] bg-stone-900/98 hidden flex-col p-10 font-mono">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-4">
+                <span class="text-teal-400 font-bold text-lg">skillforge@ai:~$</span>
+                <span class="text-stone-500 text-sm">CLI模式</span>
+            </div>
+            <button onclick="toggleCLI()" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 hover:text-white hover:bg-stone-700 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="flex-1 overflow-auto text-sm text-stone-300 space-y-3 leading-relaxed">
+            <div><span class="text-teal-400">➜</span> <span class="text-cyan-400 font-semibold">system</span> init --profile=fullstack</div>
+            <div class="text-stone-500 pl-6">[OK] 六边形能力图谱加载完成 | 6维度 | 72.4战力</div>
+            <div><span class="text-teal-400">➜</span> <span class="text-cyan-400 font-semibold">agent</span> list</div>
+            <div class="space-y-1 pl-6">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> [ACTIVE] python-mentor: 执行算法训练...</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-stone-600"></span> [IDLE] design-mentor: 等待任务</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-stone-600"></span> [IDLE] data-mentor: 等待任务</div>
+            </div>
+            <div><span class="text-teal-400">➜</span> <span class="text-cyan-400 font-semibold">goal</span> status</div>
+            <div class="pl-6 space-y-2">
+                <div>全栈工程师: <span class="text-teal-400">████████████████████░░░░░</span> <span class="text-emerald-400 font-bold">65%</span></div>
+                <div>产品设计师: <span class="text-violet-400">█████░░░░░░░░░░░░░░░░░░░░</span> <span class="text-violet-400 font-bold">20%</span></div>
+            </div>
+            <div><span class="text-teal-400">➜</span> <span class="text-cyan-400 font-semibold">task</span> today</div>
+            <div class="space-y-1 pl-6">
+                <div class="text-emerald-400">[✓] Python装饰器模式 (15min)</div>
+                <div class="text-stone-500">[ ] Figma组件系统 (30min)</div>
+                <div class="text-stone-500">[ ] 商业模式画布分析 (45min)</div>
+            </div>
+            <div class="flex items-center mt-6">
+                <span class="text-teal-400 mr-3">➜</span>
+                <span class="w-3 h-5 bg-teal-400 animate-pulse rounded-sm"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化雷达图 (使用 radar.js 数据)
+        function initRadarChart() {
+            const chartDom = document.getElementById('radarChartContainer');
+            if (!chartDom) return;
+            
+            radarChart = echarts.init(chartDom);
+            
+            // 来自 radar.js 的数据
+            const dataBJ = [
+                [55, 9, 56, 0.46, 18, 6, 1],
+                [25, 11, 21, 0.65, 34, 9, 2],
+                [56, 7, 63, 0.3, 14, 5, 3],
+                [33, 7, 29, 0.33, 16, 6, 4],
+                [42, 24, 44, 0.76, 40, 16, 5],
+                [82, 58, 90, 1.77, 68, 33, 6],
+                [74, 49, 77, 1.46, 48, 27, 7],
+                [78, 55, 80, 1.29, 59, 29, 8],
+                [267, 216, 280, 4.8, 108, 64, 9],
+                [185, 127, 216, 2.52, 61, 27, 10],
+                [39, 19, 38, 0.57, 31, 15, 11],
+                [41, 11, 40, 0.43, 21, 7, 12],
+                [64, 38, 74, 1.04, 46, 22, 13],
+                [108, 79, 120, 1.7, 75, 41, 14],
+                [108, 63, 116, 1.48, 44, 26, 15],
+                [33, 6, 29, 0.34, 13, 5, 16],
+                [94, 66, 110, 1.54, 62, 31, 17],
+                [186, 142, 192, 3.88, 93, 79, 18],
+                [57, 31, 54, 0.96, 32, 14, 19],
+                [22, 8, 17, 0.48, 23, 10, 20],
+                [39, 15, 36, 0.61, 29, 13, 21],
+                [94, 69, 114, 2.08, 73, 39, 22],
+                [99, 73, 110, 2.43, 76, 48, 23],
+                [31, 12, 30, 0.5, 32, 16, 24],
+                [42, 27, 43, 1, 53, 22, 25],
+                [154, 117, 157, 3.05, 92, 58, 26],
+                [234, 185, 230, 4.09, 123, 69, 27],
+                [160, 120, 186, 2.77, 91, 50, 28],
+                [134, 96, 165, 2.76, 83, 41, 29],
+                [52, 24, 60, 1.03, 50, 21, 30],
+                [46, 5, 49, 0.28, 10, 6, 31]
+            ];
+            const dataGZ = [
+                [26, 37, 27, 1.163, 27, 13, 1],
+                [85, 62, 71, 1.195, 60, 8, 2],
+                [78, 38, 74, 1.363, 37, 7, 3],
+                [21, 21, 36, 0.634, 40, 9, 4],
+                [41, 42, 46, 0.915, 81, 13, 5],
+                [56, 52, 69, 1.067, 92, 16, 6],
+                [64, 30, 28, 0.924, 51, 2, 7],
+                [55, 48, 74, 1.236, 75, 26, 8],
+                [76, 85, 113, 1.237, 114, 27, 9],
+                [91, 81, 104, 1.041, 56, 40, 10],
+                [84, 39, 60, 0.964, 25, 11, 11],
+                [64, 51, 101, 0.862, 58, 23, 12],
+                [70, 69, 120, 1.198, 65, 36, 13],
+                [77, 105, 178, 2.549, 64, 16, 14],
+                [109, 68, 87, 0.996, 74, 29, 15],
+                [73, 68, 97, 0.905, 51, 34, 16],
+                [54, 27, 47, 0.592, 53, 12, 17],
+                [51, 61, 97, 0.811, 65, 19, 18],
+                [91, 71, 121, 1.374, 43, 18, 19],
+                [73, 102, 182, 2.787, 44, 19, 20],
+                [73, 50, 76, 0.717, 31, 20, 21],
+                [84, 94, 140, 2.238, 68, 18, 22],
+                [93, 77, 104, 1.165, 53, 7, 23],
+                [99, 130, 227, 3.97, 55, 15, 24],
+                [146, 84, 139, 1.094, 40, 17, 25],
+                [113, 108, 137, 1.481, 48, 15, 26],
+                [81, 48, 62, 1.619, 26, 3, 27],
+                [56, 48, 68, 1.336, 37, 9, 28],
+                [82, 92, 174, 3.29, 0, 13, 29],
+                [106, 116, 188, 3.628, 101, 16, 30],
+                [118, 50, 0, 1.383, 76, 11, 31]
+            ];
+            const dataSH = [
+                [91, 45, 125, 0.82, 34, 23, 1],
+                [65, 27, 78, 0.86, 45, 29, 2],
+                [83, 60, 84, 1.09, 73, 27, 3],
+                [109, 81, 121, 1.28, 68, 51, 4],
+                [106, 77, 114, 1.07, 55, 51, 5],
+                [109, 81, 121, 1.28, 68, 51, 6],
+                [106, 77, 114, 1.07, 55, 51, 7],
+                [89, 65, 78, 0.86, 51, 26, 8],
+                [53, 33, 47, 0.64, 50, 17, 9],
+                [80, 55, 80, 1.01, 75, 24, 10],
+                [117, 81, 124, 1.03, 45, 24, 11],
+                [99, 71, 142, 1.1, 62, 42, 12],
+                [95, 69, 130, 1.28, 74, 50, 13],
+                [116, 87, 131, 1.47, 84, 40, 14],
+                [108, 80, 121, 1.3, 85, 37, 15],
+                [134, 83, 167, 1.16, 57, 43, 16],
+                [79, 43, 107, 1.05, 59, 37, 17],
+                [71, 46, 89, 0.86, 64, 25, 18],
+                [97, 71, 113, 1.17, 88, 31, 19],
+                [84, 57, 91, 0.85, 55, 31, 20],
+                [87, 63, 101, 0.9, 56, 41, 21],
+                [104, 77, 119, 1.09, 73, 48, 22],
+                [87, 62, 100, 1, 72, 28, 23],
+                [168, 128, 172, 1.49, 97, 56, 24],
+                [65, 45, 51, 0.74, 39, 17, 25],
+                [39, 24, 38, 0.61, 47, 17, 26],
+                [39, 24, 39, 0.59, 50, 19, 27],
+                [93, 68, 96, 1.05, 79, 29, 28],
+                [188, 143, 197, 1.66, 99, 51, 29],
+                [174, 131, 174, 1.55, 108, 50, 30],
+                [187, 143, 201, 1.39, 89, 53, 31]
+            ];
+            const lineStyle = {
+                width: 1,
+                opacity: 0.5
+            };
+            
+            const option = {
+                backgroundColor: 'transparent',
+                title: {
+                    text: 'AQI - Radar',
+                    left: 'center',
+                    textStyle: {
+                        color: '#1c1917',
+                        fontSize: 16,
+                        fontWeight: 600
+                    }
+                },
+                legend: {
+                    bottom: 5,
+                    data: ['Beijing', 'Shanghai', 'Guangzhou'],
+                    itemGap: 20,
+                    textStyle: {
+                        color: '#78716c',
+                        fontSize: 12
+                    },
+                    selectedMode: 'single'
+                },
+                radar: {
+                    indicator: [
+                        { name: 'AQI', max: 300 },
+                        { name: 'PM2.5', max: 250 },
+                        { name: 'PM10', max: 300 },
+                        { name: 'CO', max: 5 },
+                        { name: 'NO2', max: 200 },
+                        { name: 'SO2', max: 100 }
+                    ],
+                    shape: 'circle',
+                    splitNumber: 5,
+                    axisName: {
+                        color: '#14b8a6',
+                        fontSize: 11
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: [
+                                'rgba(20, 184, 166, 0.1)',
+                                'rgba(20, 184, 166, 0.2)',
+                                'rgba(20, 184, 166, 0.4)',
+                                'rgba(20, 184, 166, 0.6)',
+                                'rgba(20, 184, 166, 0.8)',
+                                'rgba(20, 184, 166, 1)'
+                            ].reverse()
+                        }
+                    },
+                    splitArea: {
+                        show: false
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(20, 184, 166, 0.5)'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: 'Beijing',
+                        type: 'radar',
+                        lineStyle: lineStyle,
+                        data: dataBJ,
+                        symbol: 'none',
+                        itemStyle: {
+                            color: '#F9713C'
+                        },
+                        areaStyle: {
+                            opacity: 0.1
+                        }
+                    },
+                    {
+                        name: 'Shanghai',
+                        type: 'radar',
+                        lineStyle: lineStyle,
+                        data: dataSH,
+                        symbol: 'none',
+                        itemStyle: {
+                            color: '#B3E4A1'
+                        },
+                        areaStyle: {
+                            opacity: 0.05
+                        }
+                    },
+                    {
+                        name: 'Guangzhou',
+                        type: 'radar',
+                        lineStyle: lineStyle,
+                        data: dataGZ,
+                        symbol: 'none',
+                        itemStyle: {
+                            color: 'rgb(238, 197, 102)'
+                        },
+                        areaStyle: {
+                            opacity: 0.05
+                        }
+                    }
+                ]
+            };
+            
+            radarChart.setOption(option);
+            
+            // 响应式调整
+            window.addEventListener('resize', () => {
+                radarChart.resize();
+            });
+        }
+
+        // 保存目标
+        function saveGoal() {
+            const msg = document.createElement('div');
+            msg.className = 'fixed bottom-6 right-6 p-5 rounded-2xl text-sm z-50 bg-teal-50 border border-teal-200 text-teal-700 shadow-2xl font-medium flex items-center gap-3';
+            msg.innerHTML = '<span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> 总体目标已保存，正在生成学习计划...';
+            document.body.appendChild(msg);
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(10px)';
+                setTimeout(() => msg.remove(), 300);
+            }, 3000);
+        }
+
+        // 任务切换
+        function toggleTask(el) {
+            el.classList.toggle('completed');
+            const checkbox = el.querySelector('div:first-child');
+            const text = el.querySelector('.text-sm');
+
+            if (el.classList.contains('completed')) {
+                checkbox.innerHTML = '<svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+                checkbox.className = 'w-5 h-5 rounded-lg border-2 border-emerald-500 bg-emerald-50 flex items-center justify-center mt-0.5 shadow-sm';
+                text.classList.add('line-through', 'text-stone-400');
+                text.classList.remove('font-semibold', 'text-stone-700');
+            } else {
+                checkbox.innerHTML = '';
+                checkbox.className = 'w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5 transition-colors';
+                text.classList.remove('line-through', 'text-stone-400');
+                text.classList.add('font-semibold', 'text-stone-700');
+            }
+        }
+
+        // 投喂弹窗控制
+        function openFeedModal() {
+            document.getElementById('feedModal').classList.add('active');
+        }
+
+        function closeFeedModal(event) {
+            if (!event || event.target.id === 'feedModal') {
+                document.getElementById('feedModal').classList.remove('active');
+            }
+        }
+
+        // 拖拽处理
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('feedInput').value = `已选择文件: ${files[0].name}`;
+            }
+        }
+
+        // 提交投喂
+        function submitFeed() {
+            const input = document.getElementById('feedInput');
+            const status = document.getElementById('feedStatus');
+
+            if (!input.value.trim()) {
+                input.style.borderColor = '#f43f5e';
+                setTimeout(() => input.style.borderColor = '', 1000);
+                return;
+            }
+
+            status.classList.remove('hidden');
+            setTimeout(() => {
+                status.classList.add('hidden');
+                input.value = '';
+                closeFeedModal();
+                const msg = document.createElement('div');
+                msg.className = 'fixed bottom-6 right-6 p-5 rounded-2xl text-sm z-50 bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xl font-medium flex items-center gap-3';
+                msg.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 知识已投喂给 Alpha，正在解析整合...';
+                document.body.appendChild(msg);
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    msg.style.transform = 'translateY(10px)';
+                    setTimeout(() => msg.remove(), 300);
+                }, 3000);
+            }, 2000);
+        }
+
+        // CLI切换
+        function toggleCLI() {
+            const cli = document.getElementById('cliOverlay');
+            cli.classList.toggle('hidden');
+            cli.classList.toggle('flex');
+        }
+
+        // 新增目标弹窗
+        function openNewGoalModal() {
+            const modal = document.createElement('div');
+            modal.id = 'newGoalModal';
+            modal.className = 'fixed inset-0 z-[200] bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.onclick = (e) => { if (e.target === modal) closeNewGoalModal(); };
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-stone-800">创建新目标</h3>
+                        <button onclick="closeNewGoalModal()" class="text-stone-400 hover:text-stone-600 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-2">目标名称</label>
+                            <input type="text" id="newGoalName" class="neural-input w-full text-sm" placeholder="输入你的新目标...">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-stone-700 mb-2">阶段</label>
+                                <select id="newGoalLevel" class="neural-input w-full text-sm">
+                                    <option>入门阶段</option>
+                                    <option selected>进阶阶段</option>
+                                    <option>精通阶段</option>
+                                    <option>专家阶段</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-stone-700 mb-2">周期</label>
+                                <select id="newGoalCycle" class="neural-input w-full text-sm">
+                                    <option>1个月</option>
+                                    <option selected>3个月</option>
+                                    <option>6个月</option>
+                                    <option>1年</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-2">目标描述（可选）</label>
+                            <textarea id="newGoalDesc" class="neural-input w-full text-sm h-20 resize-none" placeholder="描述你的目标详情..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="closeNewGoalModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all">取消</button>
+                        <button onclick="createNewGoal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:shadow-lg transition-all">创建目标</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeNewGoalModal() {
+            const modal = document.getElementById('newGoalModal');
+            if (modal) modal.remove();
+        }
+
+        function createNewGoal() {
+            const name = document.getElementById('newGoalName').value;
+            if (!name.trim()) {
+                document.getElementById('newGoalName').style.borderColor = '#f43f5e';
+                setTimeout(() => document.getElementById('newGoalName').style.borderColor = '', 1000);
+                return;
+            }
+            
+            closeNewGoalModal();
+            const msg = document.createElement('div');
+            msg.className = 'fixed bottom-6 right-6 p-5 rounded-2xl text-sm z-50 bg-teal-50 border border-teal-200 text-teal-700 shadow-2xl font-medium flex items-center gap-3';
+            msg.innerHTML = '<span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> 新目标已创建，正在生成学习计划...';
+            document.body.appendChild(msg);
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(10px)';
+                setTimeout(() => msg.remove(), 300);
+            }, 3000);
+        }
+
+        // 历史目标弹窗
+        function openHistoryModal() {
+            const modal = document.createElement('div');
+            modal.id = 'historyModal';
+            modal.className = 'fixed inset-0 z-[200] bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.onclick = (e) => { if (e.target === modal) closeHistoryModal(); };
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 transform transition-all max-h-[80vh] flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-stone-800">历史目标</h3>
+                        <button onclick="closeHistoryModal()" class="text-stone-400 hover:text-stone-600 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto space-y-3">
+                        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-stone-800">掌握Python全栈开发</div>
+                                    <div class="text-xs text-stone-500 mt-1">精通阶段 · 6个月 · 2025-07-01 至 2025-12-31</div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">已完成</span>
+                            </div>
+                            <div class="mt-3">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-stone-600">完成度</span>
+                                    <span class="font-bold text-emerald-600">100%</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-stone-200 overflow-hidden">
+                                    <div class="h-full rounded-full bg-emerald-500" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-stone-800">学习UI/UX设计基础</div>
+                                    <div class="text-xs text-stone-500 mt-1">入门阶段 · 3个月 · 2025-04-01 至 2025-06-30</div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-stone-200 text-stone-600">已归档</span>
+                            </div>
+                            <div class="mt-3">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-stone-600">完成度</span>
+                                    <span class="font-bold text-stone-600">85%</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-stone-200 overflow-hidden">
+                                    <div class="h-full rounded-full bg-stone-400" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-stone-800">提升数据分析能力</div>
+                                    <div class="text-xs text-stone-500 mt-1">进阶阶段 · 3个月 · 2025-01-01 至 2025-03-31</div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-stone-200 text-stone-600">已归档</span>
+                            </div>
+                            <div class="mt-3">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-stone-600">完成度</span>
+                                    <span class="font-bold text-stone-600">92%</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-stone-200 overflow-hidden">
+                                    <div class="h-full rounded-full bg-stone-400" style="width: 92%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeHistoryModal() {
+            const modal = document.getElementById('historyModal');
+            if (modal) modal.remove();
+        }
+
+        // 明日计划弹窗
+        function openTomorrowPlanModal() {
+            const modal = document.createElement('div');
+            modal.id = 'tomorrowPlanModal';
+            modal.className = 'fixed inset-0 z-[200] bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.onclick = (e) => { if (e.target === modal) closeTomorrowPlanModal(); };
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 transform transition-all max-h-[80vh] flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-stone-800">明日学习计划</h3>
+                            <p class="text-xs text-stone-500 mt-1">AI智能生成 · 根据当前进度优化</p>
+                        </div>
+                        <button onclick="closeTomorrowPlanModal()" class="text-stone-400 hover:text-stone-600 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto space-y-3">
+                        <div class="task-card flex items-start gap-4 p-4 rounded-xl border border-violet-200 bg-violet-50">
+                            <div class="w-5 h-5 rounded-lg border-2 border-violet-400 mt-0.5"></div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-stone-700">商业模式画布分析</div>
+                                <div class="text-xs text-stone-500 mt-1.5 font-medium">商业导师 · 45分钟 · <span class="text-violet-600">推荐</span></div>
+                                <div class="mt-2">
+                                    <span class="tag-purple">商业洞察</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card flex items-start gap-4 p-4 rounded-xl border border-stone-200 bg-stone-50">
+                            <div class="w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5"></div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-stone-700">React性能优化实战</div>
+                                <div class="text-xs text-stone-500 mt-1.5 font-medium">技术导师 · 60分钟 · <span class="text-blue-600">进阶</span></div>
+                                <div class="mt-2 flex gap-2">
+                                    <span class="tag">前端</span>
+                                    <span class="tag">性能</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card flex items-start gap-4 p-4 rounded-xl border border-stone-200 bg-stone-50">
+                            <div class="w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5"></div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-stone-700">团队Code Review会议</div>
+                                <div class="text-xs text-stone-500 mt-1.5 font-medium">协作导师 · 30分钟 · <span class="text-emerald-600">固定</span></div>
+                                <div class="mt-2">
+                                    <span class="tag-green">协作</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card flex items-start gap-4 p-4 rounded-xl border border-stone-200 bg-stone-50">
+                            <div class="w-5 h-5 rounded-lg border-2 border-stone-300 mt-0.5"></div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-stone-700">设计系统组件库搭建</div>
+                                <div class="text-xs text-stone-500 mt-1.5 font-medium">设计导师 · 40分钟 · <span class="text-pink-600">新增</span></div>
+                                <div class="mt-2 flex gap-2">
+                                    <span class="tag">UI</span>
+                                    <span class="tag">组件</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-stone-200">
+                        <div class="flex gap-3">
+                            <button onclick="adjustTomorrowPlan()" class="flex-1 py-3 rounded-xl text-sm font-semibold bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 transition-all">
+                                调整计划
+                            </button>
+                            <button onclick="confirmTomorrowPlan()" class="flex-1 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-500 to-purple-500 text-white hover:shadow-lg transition-all">
+                                确认执行
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeTomorrowPlanModal() {
+            const modal = document.getElementById('tomorrowPlanModal');
+            if (modal) modal.remove();
+        }
+
+        function adjustTomorrowPlan() {
+            const msg = document.createElement('div');
+            msg.className = 'fixed bottom-6 right-6 p-5 rounded-2xl text-sm z-50 bg-violet-50 border border-violet-200 text-violet-700 shadow-2xl font-medium flex items-center gap-3';
+            msg.innerHTML = '<span class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span> 正在重新生成计划...';
+            document.body.appendChild(msg);
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(10px)';
+                setTimeout(() => msg.remove(), 300);
+            }, 2000);
+        }
+
+        function confirmTomorrowPlan() {
+            closeTomorrowPlanModal();
+            const msg = document.createElement('div');
+            msg.className = 'fixed bottom-6 right-6 p-5 rounded-2xl text-sm z-50 bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xl font-medium flex items-center gap-3';
+            msg.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 明日计划已确认，将自动执行';
+            document.body.appendChild(msg);
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(10px)';
+                setTimeout(() => msg.remove(), 300);
+            }, 3000);
+        }
+
+        // 切换侧边栏
+        let sidebarCollapsed = false;
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            sidebarCollapsed = !sidebarCollapsed;
+            
+            if (sidebarCollapsed) {
+                // 收起侧边栏
+                sidebar.style.display = 'none';
+                mainContent.className = 'lg:col-span-12 space-y-6 transition-all duration-300';
+                toggleIcon.style.transform = 'rotate(180deg)';
+                toggleBtn.style.left = '6px';
+            } else {
+                // 展开侧边栏
+                sidebar.style.display = 'block';
+                mainContent.className = 'lg:col-span-8 space-y-6 transition-all duration-300';
+                toggleIcon.style.transform = 'rotate(0deg)';
+                toggleBtn.style.left = '24px';
+            }
+        }
+
+        // 当前视图状态
+        let currentView = 'radar';
+        let networkViewInitialized = false;
+        let radarChart = null;
+
+        // 视图切换功能
+        function switchView(viewName) {
+            if (viewName === currentView) return;
+
+            const radarChartContainer = document.getElementById('radarChartContainer');
+            const networkView = document.getElementById('networkView');
+            const btnRadar = document.getElementById('btnRadar');
+            const btnNetwork = document.getElementById('btnNetwork');
+            const btn3D = document.getElementById('btn3D');
+
+            // 更新按钮样式
+            [btnRadar, btnNetwork, btn3D].forEach(btn => {
+                btn.classList.remove('view-btn-active');
+                btn.classList.add('text-stone-500');
+            });
+
+            // 执行视图切换动画
+            if (viewName === 'radar') {
+                // 切换到雷达视图
+                networkView.classList.add('exiting');
+                networkView.classList.remove('active');
+                
+                setTimeout(() => {
+                    networkView.classList.add('hidden');
+                    networkView.classList.remove('exiting');
+                    
+                    radarChartContainer.classList.remove('hidden');
+                    radarChartContainer.classList.add('entering');
+                    
+                    setTimeout(() => {
+                        radarChartContainer.classList.remove('entering');
+                        radarChartContainer.classList.add('active');
+                        // 重新调整雷达图大小
+                        if (radarChart) {
+                            radarChart.resize();
+                        }
+                    }, 50);
+                }, 300);
+
+                btnRadar.classList.add('view-btn-active');
+                btnRadar.classList.remove('text-stone-500');
+            } else if (viewName === 'network' || viewName === '3d') {
+                // 切换到网络/3D视图
+                radarChartContainer.classList.add('exiting');
+                radarChartContainer.classList.remove('active');
+                
+                setTimeout(() => {
+                    radarChartContainer.classList.add('hidden');
+                    radarChartContainer.classList.remove('exiting');
+                    
+                    networkView.classList.remove('hidden');
+                    networkView.classList.add('entering');
+                    
+                    setTimeout(() => {
+                        networkView.classList.remove('entering');
+                        networkView.classList.add('active');
+                    }, 50);
+                    
+                    // 初始化知识图谱（首次切换时）
+                    if (!networkViewInitialized) {
+                        initKnowledgeGraph();
+                        networkViewInitialized = true;
+                    }
+                }, 300);
+
+                if (viewName === 'network') {
+                    btnNetwork.classList.add('view-btn-active');
+                    btnNetwork.classList.remove('text-stone-500');
+                } else {
+                    btn3D.classList.add('view-btn-active');
+                    btn3D.classList.remove('text-stone-500');
+                }
+            }
+
+            currentView = viewName;
+        }
+
+        // 知识图谱可视化
+        function initKnowledgeGraph() {
+            const canvas = document.getElementById('knowledgeGraph');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const tooltip = document.getElementById('graphTooltip');
+            
+            // 设置canvas尺寸
+            function resizeCanvas() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width * 2;
+                canvas.height = rect.height * 2;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                ctx.scale(2, 2);
+                drawGraph();
+            }
+            
+            // 知识节点数据
+            const nodes = [
+                // 前端开发
+                { id: 1, label: 'React', x: 200, y: 150, radius: 25, color: '#06b6d4', domain: '前端开发', mastery: 85 },
+                { id: 2, label: 'Vue.js', x: 150, y: 120, radius: 20, color: '#06b6d4', domain: '前端开发', mastery: 72 },
+                { id: 3, label: 'TypeScript', x: 250, y: 130, radius: 22, color: '#06b6d4', domain: '前端开发', mastery: 80 },
+                { id: 4, label: 'HTML5', x: 180, y: 100, radius: 18, color: '#06b6d4', domain: '前端开发', mastery: 90 },
+                { id: 5, label: 'CSS3', x: 220, y: 110, radius: 18, color: '#06b6d4', domain: '前端开发', mastery: 88 },
+                { id: 6, label: 'Webpack', x: 170, y: 170, radius: 15, color: '#06b6d4', domain: '前端开发', mastery: 65 },
+                { id: 7, label: 'Tailwind', x: 240, y: 170, radius: 16, color: '#06b6d4', domain: '前端开发', mastery: 78 },
+                { id: 8, label: 'Next.js', x: 190, y: 190, radius: 17, color: '#06b6d4', domain: '前端开发', mastery: 70 },
+                { id: 9, label: 'Redux', x: 210, y: 140, radius: 14, color: '#06b6d4', domain: '前端开发', mastery: 68 },
+                
+                // 后端架构
+                { id: 10, label: 'Node.js', x: 350, y: 200, radius: 24, color: '#8b5cf6', domain: '后端架构', mastery: 82 },
+                { id: 11, label: 'Python', x: 320, y: 170, radius: 26, color: '#8b5cf6', domain: '后端架构', mastery: 88 },
+                { id: 12, label: 'Express', x: 380, y: 180, radius: 18, color: '#8b5cf6', domain: '后端架构', mastery: 75 },
+                { id: 13, label: 'Django', x: 300, y: 220, radius: 20, color: '#8b5cf6', domain: '后端架构', mastery: 70 },
+                { id: 14, label: 'PostgreSQL', x: 360, y: 240, radius: 19, color: '#8b5cf6', domain: '后端架构', mastery: 73 },
+                { id: 15, label: 'Redis', x: 340, y: 150, radius: 16, color: '#8b5cf6', domain: '后端架构', mastery: 65 },
+                { id: 16, label: 'GraphQL', x: 370, y: 210, radius: 15, color: '#8b5cf6', domain: '后端架构', mastery: 60 },
+                { id: 17, label: 'Docker', x: 330, y: 250, radius: 17, color: '#8b5cf6', domain: '后端架构', mastery: 68 },
+                { id: 18, label: '微服务', x: 390, y: 230, radius: 16, color: '#8b5cf6', domain: '后端架构', mastery: 62 },
+                
+                // 数据科学
+                { id: 19, label: 'Pandas', x: 100, y: 280, radius: 20, color: '#10b981', domain: '数据科学', mastery: 75 },
+                { id: 20, label: 'NumPy', x: 80, y: 250, radius: 18, color: '#10b981', domain: '数据科学', mastery: 72 },
+                { id: 21, label: 'SQL', x: 120, y: 300, radius: 22, color: '#10b981', domain: '数据科学', mastery: 80 },
+                { id: 22, label: '数据可视化', x: 90, y: 320, radius: 17, color: '#10b981', domain: '数据科学', mastery: 68 },
+                { id: 23, label: '统计分析', x: 110, y: 260, radius: 16, color: '#10b981', domain: '数据科学', mastery: 65 },
+                { id: 24, label: 'ETL', x: 130, y: 340, radius: 14, color: '#10b981', domain: '数据科学', mastery: 58 },
+                
+                // AI/ML
+                { id: 25, label: 'TensorFlow', x: 450, y: 300, radius: 22, color: '#f59e0b', domain: 'AI/ML', mastery: 70 },
+                { id: 26, label: 'PyTorch', x: 420, y: 270, radius: 21, color: '#f59e0b', domain: 'AI/ML', mastery: 68 },
+                { id: 27, label: 'NLP', x: 470, y: 280, radius: 19, color: '#f59e0b', domain: 'AI/ML', mastery: 65 },
+                { id: 28, label: '计算机视觉', x: 440, y: 330, radius: 18, color: '#f59e0b', domain: 'AI/ML', mastery: 60 },
+                { id: 29, label: 'LLM', x: 480, y: 310, radius: 20, color: '#f59e0b', domain: 'AI/ML', mastery: 72 },
+                { id: 30, label: '机器学习', x: 430, y: 290, radius: 23, color: '#f59e0b', domain: 'AI/ML', mastery: 75 },
+                
+                // 产品设计
+                { id: 31, label: 'Figma', x: 250, y: 350, radius: 21, color: '#f43f5e', domain: '产品设计', mastery: 78 },
+                { id: 32, label: '用户研究', x: 220, y: 320, radius: 17, color: '#f43f5e', domain: '产品设计', mastery: 65 },
+                { id: 33, label: '交互设计', x: 280, y: 330, radius: 18, color: '#f43f5e', domain: '产品设计', mastery: 70 },
+                { id: 34, label: '设计系统', x: 240, y: 370, radius: 16, color: '#f43f5e', domain: '产品设计', mastery: 68 },
+                { id: 35, label: '原型设计', x: 260, y: 310, radius: 15, color: '#f43f5e', domain: '产品设计', mastery: 72 }
+            ];
+            
+            // 连接关系
+            const edges = [
+                // 前端内部连接
+                { source: 1, target: 2, weight: 0.8 },
+                { source: 1, target: 3, weight: 0.9 },
+                { source: 1, target: 9, weight: 0.7 },
+                { source: 2, target: 3, weight: 0.7 },
+                { source: 4, target: 5, weight: 0.9 },
+                { source: 4, target: 7, weight: 0.6 },
+                { source: 5, target: 7, weight: 0.8 },
+                { source: 6, target: 8, weight: 0.7 },
+                { source: 1, target: 8, weight: 0.8 },
+                
+                // 后端内部连接
+                { source: 10, target: 11, weight: 0.7 },
+                { source: 10, target: 12, weight: 0.9 },
+                { source: 11, target: 13, weight: 0.8 },
+                { source: 14, target: 15, weight: 0.6 },
+                { source: 10, target: 16, weight: 0.7 },
+                { source: 17, target: 18, weight: 0.8 },
+                { source: 12, target: 17, weight: 0.6 },
+                
+                // 数据科学内部连接
+                { source: 19, target: 20, weight: 0.9 },
+                { source: 19, target: 21, weight: 0.7 },
+                { source: 20, target: 23, weight: 0.8 },
+                { source: 22, target: 19, weight: 0.7 },
+                { source: 21, target: 24, weight: 0.6 },
+                
+                // AI/ML内部连接
+                { source: 25, target: 26, weight: 0.8 },
+                { source: 25, target: 30, weight: 0.9 },
+                { source: 26, target: 27, weight: 0.7 },
+                { source: 27, target: 29, weight: 0.8 },
+                { source: 28, target: 26, weight: 0.7 },
+                
+                // 产品设计内部连接
+                { source: 31, target: 32, weight: 0.7 },
+                { source: 31, target: 33, weight: 0.8 },
+                { source: 33, target: 34, weight: 0.7 },
+                { source: 32, target: 35, weight: 0.6 },
+                
+                // 跨领域连接
+                { source: 1, target: 10, weight: 0.6 },
+                { source: 3, target: 11, weight: 0.7 },
+                { source: 11, target: 19, weight: 0.8 },
+                { source: 11, target: 25, weight: 0.7 },
+                { source: 19, target: 25, weight: 0.6 },
+                { source: 31, target: 1, weight: 0.5 },
+                { source: 22, target: 31, weight: 0.6 }
+            ];
+            
+            // 绘制图谱
+            function drawGraph() {
+                const width = canvas.width / 2;
+                const height = canvas.height / 2;
+                
+                ctx.clearRect(0, 0, width, height);
+                
+                // 绘制连线
+                edges.forEach(edge => {
+                    const source = nodes.find(n => n.id === edge.source);
+                    const target = nodes.find(n => n.id === edge.target);
+                    
+                    if (source && target) {
+                        ctx.beginPath();
+                        ctx.moveTo(source.x, source.y);
+                        ctx.lineTo(target.x, target.y);
+                        ctx.strokeStyle = `rgba(148, 163, 184, ${edge.weight * 0.4})`;
+                        ctx.lineWidth = edge.weight * 2;
+                        ctx.stroke();
+                    }
+                });
+                
+                // 绘制节点
+                nodes.forEach(node => {
+                    // 外圈光晕
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.radius + 5, 0, Math.PI * 2);
+                    ctx.fillStyle = node.color + '20';
+                    ctx.fill();
+                    
+                    // 主圆
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                    const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, node.radius);
+                    gradient.addColorStop(0, node.color);
+                    gradient.addColorStop(1, node.color + 'CC');
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                    
+                    // 边框
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // 标签
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = `bold ${Math.max(10, node.radius * 0.6)}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(node.label, node.x, node.y);
+                });
+            }
+            
+            // 鼠标交互
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                let hoveredNode = null;
+                nodes.forEach(node => {
+                    const dist = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+                    if (dist <= node.radius) {
+                        hoveredNode = node;
+                    }
+                });
+                
+                if (hoveredNode) {
+                    canvas.style.cursor = 'pointer';
+                    tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+                    tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+                    tooltip.querySelector('div:first-child').textContent = hoveredNode.label;
+                    tooltip.querySelector('div:nth-child(2)').textContent = `领域: ${hoveredNode.domain}`;
+                    tooltip.querySelector('div:last-child span:last-child').textContent = hoveredNode.mastery + '%';
+                    tooltip.querySelector('div:last-child div div').style.width = hoveredNode.mastery + '%';
+                    tooltip.classList.remove('hidden');
+                } else {
+                    canvas.style.cursor = 'default';
+                    tooltip.classList.add('hidden');
+                }
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                tooltip.classList.add('hidden');
+            });
+            
+            // 初始化
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initRadarChart();
+            startCountdown();
+            
+            // 初始化雷达视图为激活状态
+            document.getElementById('radarChartContainer').classList.add('active');
+            document.getElementById('btnRadar').classList.add('view-btn-active');
+        });
+
+        // 倒计时功能
+        function startCountdown() {
+            // 设置目标日期（从开始日期 + 3个月）
+            const startDate = new Date('2026-01-08');
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + 3);
+            
+            function updateCountdown() {
+                const now = new Date();
+                const diff = endDate - now;
+                
+                if (diff <= 0) {
+                    document.getElementById('countdown-days').textContent = '0';
+                    document.getElementById('countdown-hours').textContent = '0';
+                    document.getElementById('countdown-minutes').textContent = '0';
+                    document.getElementById('countdown-seconds').textContent = '0';
+                    return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('countdown-days').textContent = days;
+                document.getElementById('countdown-hours').textContent = hours;
+                document.getElementById('countdown-minutes').textContent = minutes;
+                document.getElementById('countdown-seconds').textContent = seconds;
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+    </script>
+</body>
+</html>
