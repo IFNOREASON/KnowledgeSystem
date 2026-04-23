@@ -1,0 +1,62 @@
+.content {
+  margin-left: 320px;
+  margin-top: 60px;
+  padding: 24px;
+  min-height: calc(100vh - 60px);
+  background-color: #f8fafc;
+}
+
+.content-header {
+  margin-bottom: 24px;
+}
+
+.content-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.content-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.content-body {
+  display: flex;
+  gap: 24px;
+}
+
+.welcome-card {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.welcome-card h2 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.welcome-card p {
+  margin: 0 0 16px 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.welcome-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.welcome-card li {
+  margin-bottom: 8px;
+  color: #475569;
+  line-height: 1.6;
+}
