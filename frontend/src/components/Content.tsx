@@ -1,22 +1,57 @@
+import React from 'react';
+import GraphView from './GraphView';
+import AIChat from './AIChat';
 import './Content.css';
 
+interface ExtendedData {
+  [key: string]: any;
+}
+
+interface GraphNode {
+  id: string;
+  label: string;
+  x?: number;
+  y?: number;
+  cluster?: string;
+  extendedData?: ExtendedData;
+  [key: string]: any;
+}
+
+interface GraphEdge {
+  source: string;
+  target: string;
+  label?: string;
+  extendedData?: ExtendedData;
+  [key: string]: any;
+}
+
 function Content() {
+  const handleNodeClick = (node: GraphNode) => {
+    console.log('Node clicked:', node);
+  };
+
+  const handleEdgeClick = (edge: GraphEdge) => {
+    console.log('Edge clicked:', edge);
+  };
+
+  const handleSendMessage = (message: string) => {
+    console.log('Message sent:', message);
+  };
+
   return (
     <main className="content">
-      <div className="content-header">
-        <h1>欢迎使用 HXmind</h1>
-        <p>您的智能知识管理系统</p>
-      </div>
-      <div className="content-body">
-        <div className="welcome-card">
-          <h2>开始探索</h2>
-          <p>这里是您的知识管理中心，您可以：</p>
-          <ul>
-            <li>📚 创建和管理您的知识库</li>
-            <li>🔍 快速搜索和定位知识内容</li>
-            <li>📊 查看知识统计和分析</li>
-            <li>⚙️ 自定义系统设置</li>
-          </ul>
+      <div className="content-layout">
+        <div className="graph-section">
+          <GraphView 
+            onNodeClick={handleNodeClick}
+            onEdgeClick={handleEdgeClick}
+          />
+        </div>
+        
+        <div className="chat-section">
+          <AIChat 
+            onSendMessage={handleSendMessage}
+          />
         </div>
       </div>
     </main>
