@@ -1,0 +1,10 @@
+com\knowledgesystem\mapper\FileInfoMapper.class
+com\knowledgesystem\service\FileService.class
+com\knowledgesystem\controller\FileController.class
+com\knowledgesystem\controller\FileController$Result.class
+com\knowledgesystem\config\MybatisPlusConfig.class
+com\knowledgesystem\config\SwaggerConfig.class
+com\knowledgesystem\controller\DemoController.class
+com\knowledgesystem\KnowledgeSystemApplication.class
+com\knowledgesystem\service\impl\FileServiceImpl.class
+com\knowledgesystem\entity\FileInfo.class
