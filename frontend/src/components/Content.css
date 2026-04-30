@@ -2,8 +2,9 @@
   margin-left: 320px;
   margin-top: 60px;
   height: calc(100vh - 60px);
-  background-color: #f8fafc;
+  background-color: var(--bg-secondary);
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .content-layout {
@@ -21,28 +22,44 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.chat-section {
-  height: 320px;
-  min-height: 280px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  resize: vertical;
   overflow: hidden;
 }
 
-.chat-section::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background-color: transparent;
+.resize-handle {
+  height: 8px;
+  background-color: var(--bg-secondary);
   cursor: row-resize;
-  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.resize-handle:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.resize-indicator {
+  width: 40px;
+  height: 4px;
+  background-color: var(--border-color);
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.resize-handle:hover .resize-indicator {
+  background-color: var(--accent-primary);
+}
+
+.chat-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 200px;
 }
 
 .content-header {
@@ -53,13 +70,15 @@
   margin: 0 0 8px 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .content-header p {
   margin: 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 14px;
+  transition: color 0.3s ease;
 }
 
 .content-body {
@@ -69,24 +88,27 @@
 
 .welcome-card {
   flex: 1;
-  background-color: #ffffff;
+  background-color: var(--bg-primary);
   border-radius: 12px;
   padding: 28px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .welcome-card h2 {
   margin: 0 0 16px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .welcome-card p {
   margin: 0 0 16px 0;
-  color: #475569;
+  color: var(--text-tertiary);
   line-height: 1.6;
+  transition: color 0.3s ease;
 }
 
 .welcome-card ul {
@@ -96,6 +118,7 @@
 
 .welcome-card li {
   margin-bottom: 8px;
-  color: #475569;
+  color: var(--text-tertiary);
   line-height: 1.6;
+  transition: color 0.3s ease;
 }

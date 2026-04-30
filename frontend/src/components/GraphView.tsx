@@ -103,10 +103,15 @@ const GraphView: React.FC<GraphViewProps> = ({
       },
       layout: {
         type: 'force',
-        linkDistance: 100,
+        linkDistance: 80,
         clustering: true,
         nodeClusterBy: 'cluster',
-        clusterNodeStrength: 70,
+        clusterNodeStrength: 50,
+        nodeStrength: -200,
+        edgeStrength: 0.8,
+        gravity: 10,
+        preventOverlap: true,
+        nodeSpacing: 20,
       },
     });
 
@@ -252,74 +257,8 @@ const GraphView: React.FC<GraphViewProps> = ({
   const renderLegend = () => {
     return (
       <div className="graph-legend">
-        <div className="legend-title">操作说明</div>
         <div className="legend-items">
-          <div className="legend-item">
-            <div className="legend-icon drag-node-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L14 6H10L12 2Z" fill="currentColor"/>
-                <path d="M12 22L14 18H10L12 22Z" fill="currentColor"/>
-                <path d="M2 12L6 14V10L2 12Z" fill="currentColor"/>
-                <path d="M22 12L18 14V10L22 12Z" fill="currentColor"/>
-                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-            <span className="legend-text">拖动节点</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-icon drag-canvas-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L14 6H10L12 2Z" fill="currentColor"/>
-                <path d="M12 22L14 18H10L12 22Z" fill="currentColor"/>
-                <path d="M2 12L6 14V10L2 12Z" fill="currentColor"/>
-                <path d="M22 12L18 14V10L22 12Z" fill="currentColor"/>
-                <rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-            <span className="legend-text">拖动画布</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-icon zoom-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2"/>
-                <path d="M16 16L20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M11 8V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M8 11H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className="legend-text">滚轮缩放</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-icon click-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L12 12M12 12L9 9M12 12L15 9M12 12L9 15M12 12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-            <span className="legend-text">点击查看详情</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-icon reset-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M3 12C3 14.75 4.5 18.5 9 20.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M9 12L6 9L3 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <span className="legend-text">重置视图</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-icon fit-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
-                <path d="M7 7H11V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M17 17H13V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M17 7H13V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M7 17H11V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <span className="legend-text">适应视图</span>
-          </div>
+          <span className="legend-text">操作：拖拽节点/画布 | 滚轮缩放 | 点击查看详情</span>
         </div>
       </div>
     );
