@@ -86,9 +86,21 @@ public class DatabaseInitializer implements ApplicationRunner {
             addColumnIfNotExists("file_info", "object_name", "VARCHAR(255)");
             addColumnIfNotExists("file_info", "access_url", "VARCHAR(1000)");
             
+            makeColumnNullable("file_info", "file_path", "VARCHAR(500)");
+            
             log.info("file_info 表字段更新完成");
         } catch (Exception e) {
             log.error("更新 file_info 表字段失败", e);
+        }
+    }
+    
+    private void makeColumnNullable(String tableName, String columnName, String columnDefinition) {
+        try {
+            String sql = "ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL";
+            jdbcTemplate.execute(sql);
+            log.info("字段 {}.{} 已修改为允许为空", tableName, columnName);
+        } catch (Exception e) {
+            log.warn("修改字段 {}.{} 允许为空时出错（可能已允许为空）: {}", tableName, columnName, e.getMessage());
         }
     }
 

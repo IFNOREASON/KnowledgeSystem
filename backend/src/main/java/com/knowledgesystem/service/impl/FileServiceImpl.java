@@ -97,6 +97,7 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
             FileInfo fileInfo = new FileInfo();
             fileInfo.setFileName(objectName);
             fileInfo.setOriginalName(originalFilename);
+            fileInfo.setFilePath("");
             fileInfo.setFileSize(fileSize);
             fileInfo.setContentType(contentType);
             fileInfo.setFileExtension(fileExtension);
