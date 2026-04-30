@@ -15,4 +15,6 @@ public interface FileService extends IService<FileInfo> {
     boolean deleteFile(Long id);
 
     List<FileInfo> listAllFiles();
+
+    FileInfo renameFile(Long id, String newName);
 }

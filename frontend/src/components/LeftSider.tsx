@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { fileApi, FileInfo, formatFileSize, getFileIcon } from '../api/fileApi';
+import { fileApi, FileInfo, formatFileSize, getFileIcon, getPreviewType, PreviewType } from '../api/fileApi';
 import './LeftSider.css';
 
 function LeftSider() {
@@ -18,6 +18,10 @@ function LeftSider() {
 
   const [showViewModal, setShowViewModal] = useState(false);
   const [fileToView, setFileToView] = useState<FileInfo | null>(null);
+
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [fileToRename, setFileToRename] = useState<FileInfo | null>(null);
+  const [newFileName, setNewFileName] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -146,6 +150,45 @@ function LeftSider() {
     setFileToView(null);
   };
 
+  const handleRenameClick = (file: FileInfo) => {
+    setFileToRename(file);
+    setNewFileName(file.originalName || '');
+    setShowRenameModal(true);
+  };
+
+  const confirmRename = async () => {
+    if (!fileToRename || !newFileName.trim()) return;
+
+    const trimmedName = newFileName.trim();
+    if (trimmedName === fileToRename.originalName) {
+      setShowRenameModal(false);
+      setFileToRename(null);
+      return;
+    }
+
+    try {
+      const response = await fileApi.renameFile(fileToRename.id, trimmedName);
+      if (response.code === 200) {
+        setUploadedFiles(prev =>
+          prev.map(f => f.id === fileToRename.id ? { ...f, originalName: trimmedName } : f)
+        );
+        setShowRenameModal(false);
+        setFileToRename(null);
+        setSuccessMessage(`文件已重命名为 "${trimmedName}"`);
+      } else {
+        setErrorMessage(response.message || '重命名失败');
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message || '重命名失败');
+    }
+  };
+
+  const cancelRename = () => {
+    setShowRenameModal(false);
+    setFileToRename(null);
+    setNewFileName('');
+  };
+
   const handlePreviewFile = () => {
     if (fileToView?.accessUrl) {
       window.open(fileToView.accessUrl, '_blank');
@@ -163,6 +206,95 @@ function LeftSider() {
 
   const getStorageTypeLabel = (type: string) => {
     return type === 'minio' ? '☁️ MinIO' : '💾 本地';
+  };
+
+  const renderPreviewContent = (file: FileInfo) => {
+    const previewType = getPreviewType(file.contentType || '', file.fileExtension || '');
+    const accessUrl = file.accessUrl;
+
+    switch (previewType) {
+      case PreviewType.IMAGE:
+        return (
+          <div className="image-preview-wrapper">
+            <img
+              src={accessUrl}
+              alt={file.originalName}
+              className="preview-image"
+            />
+          </div>
+        );
+
+      case PreviewType.VIDEO:
+        return (
+          <div className="video-preview-wrapper">
+            <video
+              src={accessUrl}
+              controls
+              className="preview-video"
+            />
+          </div>
+        );
+
+      case PreviewType.PDF:
+        return (
+          <div className="pdf-preview-wrapper">
+            <iframe
+              src={accessUrl}
+              title={file.originalName}
+              className="preview-iframe"
+            />
+          </div>
+        );
+
+      case PreviewType.DOCUMENT:
+        return (
+          <div className="document-preview-wrapper">
+            <div className="document-preview-placeholder">
+              <div className="document-preview-icon">
+                {getFileIcon(file.contentType || '', file.fileExtension || '')}
+              </div>
+              <p className="document-preview-text">Word 文档预览</p>
+              <p className="document-preview-hint">
+                由于浏览器限制，Word 文档需要在新窗口中查看，或下载后使用本地软件打开
+              </p>
+              <div className="document-preview-actions">
+                <button
+                  className="btn btn-primary preview-btn"
+                  onClick={() => {
+                    if (accessUrl) {
+                      window.open(accessUrl, '_blank');
+                    }
+                  }}
+                >
+                  🔗 在新窗口打开
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case PreviewType.TEXT:
+        return (
+          <div className="text-preview-wrapper">
+            <iframe
+              src={accessUrl}
+              title={file.originalName}
+              className="preview-iframe"
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <div className="no-direct-preview">
+            <div className="no-preview-icon">
+              {getFileIcon(file.contentType || '', file.fileExtension || '')}
+            </div>
+            <p className="no-preview-text">该文件类型不支持直接预览</p>
+            <p className="no-preview-hint">请点击"在新窗口打开"查看或下载</p>
+          </div>
+        );
+    }
   };
 
   return (
@@ -290,8 +422,10 @@ function LeftSider() {
                   {getFileIcon(file.contentType || '', file.fileExtension || '')}
                 </div>
                 <div className="file-info">
-                  <div className="file-name" title={file.originalName}>
-                    {file.originalName}
+                  <div className="file-name">
+                    <span className="file-name-text" title={file.originalName}>
+                      {file.originalName}
+                    </span>
                   </div>
                   <div className="file-meta">
                     <span className="file-type">{getStorageTypeLabel(file.storageType || 'local')}</span>
@@ -309,6 +443,13 @@ function LeftSider() {
                       👁️
                     </button>
                   )}
+                  <button
+                    className="action-btn rename-btn"
+                    onClick={() => handleRenameClick(file)}
+                    title="重命名"
+                  >
+                    ✏️
+                  </button>
                   <button
                     className="action-btn delete-btn"
                     onClick={() => handleDeleteClick(file)}
@@ -365,8 +506,8 @@ function LeftSider() {
             </div>
             <div className="modal-body view-body">
               {fileToView.accessUrl ? (
-                <div className="file-preview-info">
-                  <div className="preview-actions">
+                <div className="file-preview-container">
+                  <div className="preview-actions-bar">
                     <button
                       className="btn btn-primary preview-btn"
                       onClick={handlePreviewFile}
@@ -374,10 +515,7 @@ function LeftSider() {
                       🔗 在新窗口打开
                     </button>
                   </div>
-                  <div className="access-url-info">
-                    <p className="url-label">访问链接：</p>
-                    <p className="url-value">{fileToView.accessUrl}</p>
-                  </div>
+                  {renderPreviewContent(fileToView)}
                 </div>
               ) : (
                 <div className="no-preview">
@@ -387,6 +525,45 @@ function LeftSider() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-primary" onClick={closeViewModal}>关闭</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRenameModal && fileToRename && (
+        <div className="modal-overlay" onClick={cancelRename}>
+          <div className="modal-content rename-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-title">✏️ 重命名文件</span>
+              <button className="modal-close" onClick={cancelRename}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="rename-input-wrapper">
+                <label className="rename-label">新文件名：</label>
+                <input
+                  type="text"
+                  className="rename-input"
+                  value={newFileName}
+                  onChange={(e) => setNewFileName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') confirmRename();
+                    if (e.key === 'Escape') cancelRename();
+                  }}
+                  placeholder="请输入新文件名"
+                  autoFocus
+                />
+              </div>
+              <p className="rename-hint">原文件名：{fileToRename.originalName}</p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={cancelRename}>取消</button>
+              <button
+                className="btn btn-primary"
+                onClick={confirmRename}
+                disabled={!newFileName.trim()}
+              >
+                确认重命名
+              </button>
             </div>
           </div>
         </div>

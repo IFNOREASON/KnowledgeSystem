@@ -78,6 +78,27 @@ public class FileController {
         return ResponseEntity.ok(Result.success(files));
     }
 
+    @Operation(summary = "重命名文件", description = "根据ID重命名文件")
+    @PutMapping("/{id}/rename")
+    public ResponseEntity<Result<FileInfo>> renameFile(
+            @Parameter(description = "文件ID")
+            @PathVariable Long id,
+            @RequestBody RenameRequest request) {
+        try {
+            FileInfo fileInfo = fileService.renameFile(id, request.getNewName());
+            return ResponseEntity.ok(Result.success(fileInfo));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Result.error(e.getMessage()));
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RenameRequest {
+        private String newName;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

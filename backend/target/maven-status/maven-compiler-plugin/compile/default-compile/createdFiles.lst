@@ -34,4 +34,5 @@ com\knowledgesystem\service\impl\ChatServiceImpl.class
 com\knowledgesystem\service\FileService.class
 com\knowledgesystem\controller\UserController$Result.class
 com\knowledgesystem\controller\UserController.class
+com\knowledgesystem\controller\FileController$RenameRequest.class
 com\knowledgesystem\KnowledgeSystemApplication.class

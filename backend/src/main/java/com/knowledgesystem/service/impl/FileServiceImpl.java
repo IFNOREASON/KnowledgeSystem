@@ -201,6 +201,38 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
         return fileInfo;
     }
 
+    @Override
+    public FileInfo renameFile(Long id, String newName) {
+        if (id == null) {
+            throw new RuntimeException("文件ID不能为空");
+        }
+        if (!StringUtils.hasText(newName)) {
+            throw new RuntimeException("新文件名不能为空");
+        }
+
+        FileInfo fileInfo = getById(id);
+        if (fileInfo == null || fileInfo.getDeleted() == 1) {
+            throw new RuntimeException("文件不存在或已被删除");
+        }
+
+        String newNameTrimmed = newName.trim();
+        if (newNameTrimmed.length() > 255) {
+            throw new RuntimeException("文件名不能超过255个字符");
+        }
+
+        fileInfo.setOriginalName(newNameTrimmed);
+        fileInfo.setUpdateTime(LocalDateTime.now());
+
+        boolean updated = updateById(fileInfo);
+        if (!updated) {
+            throw new RuntimeException("重命名失败");
+        }
+
+        log.info("文件重命名成功，ID: {}, 旧名称: {}, 新名称: {}", id, fileInfo.getOriginalName(), newNameTrimmed);
+
+        return enrichFileInfoWithUrl(fileInfo);
+    }
+
     private String getFileExtension(String fileName) {
         if (!StringUtils.hasText(fileName)) {
             return "";

@@ -91,6 +91,20 @@ export const fileApi = {
     }
     return await response.json();
   },
+
+  async renameFile(fileId: number, newName: string): Promise<ApiResponse<FileInfo>> {
+    const response = await fetch(`${API_BASE_URL}/files/${fileId}/rename`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ newName }),
+    });
+    if (!response.ok) {
+      throw new Error(`重命名文件失败: ${response.status}`);
+    }
+    return await response.json();
+  },
 };
 
 export const formatFileSize = (bytes: number): string => {
@@ -126,4 +140,39 @@ export const getFileIcon = (contentType: string, extension: string): string => {
   }
   
   return '📁';
+};
+
+export enum PreviewType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+  PDF = 'pdf',
+  TEXT = 'text',
+  DOCUMENT = 'document',
+  OTHER = 'other',
+}
+
+export const getPreviewType = (contentType: string, extension: string): PreviewType => {
+  const ext = extension.toLowerCase().replace('.', '');
+  
+  if (contentType?.startsWith('image/')) {
+    return PreviewType.IMAGE;
+  }
+  if (contentType?.startsWith('video/')) {
+    return PreviewType.VIDEO;
+  }
+  if (contentType === 'application/pdf' || ext === 'pdf') {
+    return PreviewType.PDF;
+  }
+  
+  const docTypes = ['doc', 'docx'];
+  if (docTypes.includes(ext)) {
+    return PreviewType.DOCUMENT;
+  }
+  
+  const textTypes = ['txt', 'md', 'json', 'xml', 'html', 'css', 'js', 'ts', 'tsx', 'jsx'];
+  if (textTypes.includes(ext)) {
+    return PreviewType.TEXT;
+  }
+  
+  return PreviewType.OTHER;
 };
