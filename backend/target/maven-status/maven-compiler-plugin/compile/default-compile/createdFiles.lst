@@ -8,9 +8,11 @@ com\knowledgesystem\entity\User.class
 com\knowledgesystem\controller\ChatController$Result.class
 com\knowledgesystem\controller\FileController.class
 com\knowledgesystem\service\ChatService.class
+com\knowledgesystem\service\MinIOService.class
 com\knowledgesystem\controller\ConfigController.class
 com\knowledgesystem\config\MybatisPlusConfig.class
 com\knowledgesystem\service\AIService.class
+com\knowledgesystem\config\MinIOConfig.class
 com\knowledgesystem\controller\ChatController.class
 com\knowledgesystem\service\impl\FileServiceImpl.class
 com\knowledgesystem\config\AIConfig.class

@@ -3,7 +3,9 @@ D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\know
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\service\impl\ChatServiceImpl.java
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\service\UserService.java
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\controller\ChatController.java
+D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\service\MinIOService.java
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\mapper\ChatMessageMapper.java
+D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\config\MinIOConfig.java
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\config\SwaggerConfig.java
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\mapper\ChatSessionMapper.java
 D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\backend\src\main\java\com\knowledgesystem\mapper\UserMapper.java

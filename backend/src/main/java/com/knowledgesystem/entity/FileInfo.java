@@ -29,6 +29,14 @@ public class FileInfo implements Serializable {
 
     private String md5;
 
+    private String storageType;
+
+    private String bucketName;
+
+    private String objectName;
+
+    private String accessUrl;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime uploadTime;
 

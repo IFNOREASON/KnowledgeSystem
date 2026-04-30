@@ -47,3 +47,11 @@ ai:
   temperature: 0.7
   max-context-messages: 20
   system-prompt: 你是一个专业的知识图谱AI助手，擅长分析知识图谱中的节点和关系。请根据用户的问题，结合知识图谱的上下文，给出专业、准确、有帮助的回答。
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin123
+  bucket-name: knowledge-files
+  part-size: 10485760
+  data-dir: D:\WorkSpace\openclaw\project3\KS\KnowledgeSystem\minio-data
